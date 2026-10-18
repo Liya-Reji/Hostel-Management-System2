@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Fee & Bill Management - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-navy mb-1">Hostel Fee & Billing Management</h2>
+            <p class="text-muted small mb-0">Issue rent, mess, and utility bills, record offline receipts, and track student balances.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_generate_bill') }}" class="btn btn-teal">
+                <i class="bi bi-receipt-cutoff me-1"></i> Issue New Bill
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card p-3 h-100" style="border-left-color: #3b82f6;">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Total Amount Billed</div>
+                <h3 class="fw-bold mb-0 text-primary">{{ total_billed|currency }}</h3>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card p-3 h-100" style="border-left-color: #10b981;">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Total Fees Collected</div>
+                <h3 class="fw-bold mb-0 text-success">{{ total_collected|currency }}</h3>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card p-3 h-100" style="border-left-color: #f59e0b;">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Total Outstanding Balance</div>
+                <h3 class="fw-bold mb-0 text-warning">{{ pending_balance|currency }}</h3>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card p-3 h-100" style="border-left-color: #ef4444;">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Overdue Invoices</div>
+                <h3 class="fw-bold mb-0 text-danger">{{ overdue_count }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card p-3 mb-4 shadow-sm border-0">
+        <form method="GET" action="{{ url_for('admin_fees') }}" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <input type="text" name="student" class="form-control" placeholder="Search student or bill #..." value="{{ student_query }}">
+            </div>
+            <div class="col-md-2">
+                <select name="fee_type" class="form-select">
+                    <option value="all" {% if selected_fee_type == 'all' %}selected{% endif %}>All Fee Types</option>
+                    <option value="Hostel Rent" {% if selected_fee_type == 'Hostel Rent' %}selected{% endif %}>Hostel Rent</option>
+                    <option value="Mess Fee" {% if selected_fee_type == 'Mess Fee' %}selected{% endif %}>Mess Fee</option>
+                    <option value="Electricity & Utilities" {% if selected_fee_type == 'Electricity & Utilities' %}selected{% endif %}>Electricity & Utilities</option>
+                    <option value="Maintenance Fee" {% if selected_fee_type == 'Maintenance Fee' %}selected{% endif %}>Maintenance Fee</option>
+                    <option value="Other Charges" {% if selected_fee_type == 'Other Charges' %}selected{% endif %}>Other Charges</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All Statuses</option>
+                    <option value="Pending" {% if selected_status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Partially Paid" {% if selected_status == 'Partially Paid' %}selected{% endif %}>Partially Paid</option>
+                    <option value="Paid" {% if selected_status == 'Paid' %}selected{% endif %}>Paid</option>
+                    <option value="Overdue" {% if selected_status == 'Overdue' %}selected{% endif %}>Overdue</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="period" class="form-control" placeholder="Billing period (e.g. October 2026)..." value="{{ selected_period }}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary-custom">Filter</button>
+                <a href="{{ url_for('admin_fees') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bills Table -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Invoice / Bill #</th>
+                        <th>Student Name</th>
+                        <th>Fee Category</th>
+                        <th>Billing Period</th>
+                        <th>Billed Amount</th>
+                        <th>Amount Paid</th>
+                        <th>Balance Due</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bills %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('admin_view_bill', id=b.id) }}" class="fw-bold text-decoration-none">
+                                    {{ b.bill_number }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">{{ b.student.full_name }}</div>
+                                <div class="small text-muted font-monospace">{{ b.student.student_id }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ b.fee_type }}</span>
+                            </td>
+                            <td>{{ b.billing_period }}</td>
+                            <td class="fw-bold text-navy">{{ b.amount|currency }}</td>
+                            <td class="text-success fw-semibold">{{ b.total_paid|currency }}</td>
+                            <td class="fw-bold {{ 'text-danger' if b.balance > 0 else 'text-muted' }}">
+                                {{ b.balance|currency }}
+                            </td>
+                            <td>
+                                <span class="small {{ 'text-danger fw-bold' if b.status == 'Overdue' else 'text-muted' }}">
+                                    {{ b.due_date|format_date }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge-status badge-{{ b.status|lower|replace(' ', '-') }}">{{ b.status }}</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('admin_view_bill', id=b.id) }}" class="btn btn-outline-primary" title="View Bill & History">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% if b.balance > 0 %}
+                                        <a href="{{ url_for('admin_record_payment', id=b.id) }}" class="btn btn-teal" title="Record Offline Payment">
+                                            <i class="bi bi-cash me-1"></i> Pay
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="bi bi-receipt fs-1 text-secondary d-block mb-2"></i>
+                                No fee invoices found matching the specified filters.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

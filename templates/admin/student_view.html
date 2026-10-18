@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.full_name }} - Profile & Fees - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ url_for('admin_students') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="fw-bold text-navy mb-0">{{ student.full_name }}</h2>
+                <div class="text-muted small">Student ID: <span class="font-monospace text-primary fw-semibold">{{ student.student_id }}</span> &bull; {{ student.course }}</div>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin_edit_student', id=student.id) }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-pencil me-1"></i> Edit Student
+            </a>
+            <a href="{{ url_for('admin_generate_bill') }}?student_id={{ student.id }}" class="btn btn-teal btn-sm">
+                <i class="bi bi-receipt me-1"></i> Issue Bill
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Student Info Column -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-navy"><i class="bi bi-person-badge text-teal me-2"></i>Personal Details</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Username</span>
+                            <span class="fw-semibold">{{ student.user.username }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Email</span>
+                            <span class="fw-semibold">{{ student.user.email }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Phone</span>
+                            <span class="fw-semibold">{{ student.phone }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Gender</span>
+                            <span class="fw-semibold">{{ student.gender }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Account Status</span>
+                            <span>
+                                {% if student.is_active %}
+                                    <span class="badge bg-success-subtle text-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">Deactivated</span>
+                                {% endif %}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Guardian</span>
+                            <span class="fw-semibold">{{ student.guardian_name or '-' }} ({{ student.guardian_phone or '-' }})</span>
+                        </li>
+                        <li class="list-group-item px-0">
+                            <div class="text-muted mb-1">Permanent Address</div>
+                            <div class="fw-semibold">{{ student.address or '-' }}</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Current Room Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-navy"><i class="bi bi-door-open text-teal me-2"></i>Current Room Allocation</h5>
+                </div>
+                <div class="card-body">
+                    {% if student.active_allocation %}
+                        <div class="p-3 bg-light rounded-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h4 class="fw-bold text-navy mb-0">Room {{ student.active_allocation.room.room_number }}</h4>
+                                <span class="badge bg-success">Active Resident</span>
+                            </div>
+                            <div class="small text-muted mb-1">{{ student.active_allocation.room.room_type }} &bull; Rent: {{ student.active_allocation.monthly_rent|currency }}/mo</div>
+                            <div class="small text-muted">Allocated Date: {{ student.active_allocation.allocated_date|format_date }}</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('admin_change_room', id=student.active_allocation.id) }}" class="btn btn-outline-primary btn-sm flex-fill">
+                                <i class="bi bi-arrow-repeat me-1"></i> Change Room
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_checkout_allocation', id=student.active_allocation.id) }}" class="flex-fill" onsubmit="return confirm('Confirm checkout for this student?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Check Out
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-door-closed fs-2 text-secondary d-block mb-2"></i>
+                            Not currently allocated to any room.
+                            <div class="mt-3">
+                                <a href="{{ url_for('admin_new_allocation') }}?student_id={{ student.id }}" class="btn btn-teal btn-sm">
+                                    <i class="bi bi-key me-1"></i> Allocate Now
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing and History Column -->
+        <div class="col-lg-8">
+            <!-- Financial Summary Box -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card p-3 shadow-sm border-0 bg-primary-subtle">
+                        <span class="small text-muted text-uppercase fw-semibold">Total Billed</span>
+                        <h4 class="fw-bold text-primary mb-0">{{ student.bills|sum(attribute='amount')|currency }}</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 shadow-sm border-0 bg-success-subtle">
+                        <span class="small text-muted text-uppercase fw-semibold">Total Paid</span>
+                        <h4 class="fw-bold text-success mb-0">{{ student.bills|sum(attribute='total_paid')|currency }}</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 shadow-sm border-0 bg-warning-subtle">
+                        <span class="small text-muted text-uppercase fw-semibold">Outstanding Balance</span>
+                        <h4 class="fw-bold text-warning mb-0">{{ student.total_outstanding|currency }}</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bills Table -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-navy"><i class="bi bi-receipt text-teal me-2"></i>Student Bills & Invoices</h5>
+                    <a href="{{ url_for('admin_generate_bill') }}?student_id={{ student.id }}" class="btn btn-outline-teal btn-sm">
+                        + New Bill
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Bill #</th>
+                                <th>Type</th>
+                                <th>Period</th>
+                                <th>Amount</th>
+                                <th>Paid</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in bills %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('admin_view_bill', id=b.id) }}" class="fw-bold text-decoration-none">
+                                            {{ b.bill_number }}
+                                        </a>
+                                        <div class="small text-muted">Due: {{ b.due_date|format_date }}</div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">{{ b.fee_type }}</span></td>
+                                    <td>{{ b.billing_period }}</td>
+                                    <td class="fw-semibold">{{ b.amount|currency }}</td>
+                                    <td class="text-success">{{ b.total_paid|currency }}</td>
+                                    <td class="fw-bold text-danger">{{ b.balance|currency }}</td>
+                                    <td>
+                                        <span class="badge-status badge-{{ b.status|lower|replace(' ', '-') }}">{{ b.status }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('admin_view_bill', id=b.id) }}" class="btn btn-sm btn-outline-primary" title="View details & record payment">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">No billing records found for this student.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Allocation History -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-navy"><i class="bi bi-clock-history text-teal me-2"></i>Allocation History</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>Monthly Rent</th>
+                                <th>Allocated Date</th>
+                                <th>Checkout Date</th>
+                                <th>State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in allocations %}
+                                <tr>
+                                    <td class="fw-semibold">Room {{ a.room.room_number }} ({{ a.room.room_type }})</td>
+                                    <td>{{ a.monthly_rent|currency }}</td>
+                                    <td>{{ a.allocated_date|format_date }}</td>
+                                    <td>{{ a.checkout_date|format_date if a.checkout_date else 'Current' }}</td>
+                                    <td>
+                                        {% if a.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Checked Out</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-3 text-muted">No allocation history.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-3">
+                <a href="{{ url_for('admin_students') }}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Students
+                </a>
+                <h3 class="fw-bold text-navy mb-0">{{ title }}</h3>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2">Login Credentials</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="username">Username *</label>
+                                {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                                {% for error in form.username.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="email">Email *</label>
+                                {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                                {% for error in form.email.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label small fw-semibold" for="password">Password</label>
+                                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                                {% if 'Edit' in title %}
+                                    <div class="form-text small">Leave blank to keep existing password unchanged.</div>
+                                {% endif %}
+                                {% for error in form.password.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2 pt-2">Student Information</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="student_id">Roll No / Student ID *</label>
+                                {{ form.student_id(class="form-control" + (" is-invalid" if form.student_id.errors else "")) }}
+                                {% for error in form.student_id.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="full_name">Full Name *</label>
+                                {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else "")) }}
+                                {% for error in form.full_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="course">Course / Department *</label>
+                                {{ form.course(class="form-control" + (" is-invalid" if form.course.errors else "")) }}
+                                {% for error in form.course.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold" for="phone">Phone *</label>
+                                {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else "")) }}
+                                {% for error in form.phone.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold" for="gender">Gender *</label>
+                                {{ form.gender(class="form-select") }}
+                            </div>
+                        </div>
+
+                        <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2 pt-2">Guardian & Address Details</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="guardian_name">Guardian Name</label>
+                                {{ form.guardian_name(class="form-control") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="guardian_phone">Guardian Phone</label>
+                                {{ form.guardian_phone(class="form-control") }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold" for="address">Permanent Address</label>
+                                {{ form.address(class="form-control", rows="2") }}
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch mt-2">
+                                    {{ form.is_active(class="form-check-input", role="switch") }}
+                                    <label class="form-check-label fw-semibold" for="is_active">Account Active</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top">
+                            <a href="{{ url_for('admin_students') }}" class="btn btn-outline-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-teal px-4") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

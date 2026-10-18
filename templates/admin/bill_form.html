@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Bill - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="d-flex align-items-center mb-3">
+                <a href="{{ url_for('admin_fees') }}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Fees
+                </a>
+                <h3 class="fw-bold text-navy mb-0">Generate Student Bill</h3>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="target">Billing Target</label>
+                            {{ form.target(class="form-select", id="targetSelect") }}
+                            <div class="form-text small">Select whether to bill an individual student or all currently allocated hostel residents in bulk.</div>
+                        </div>
+
+                        <div class="mb-3" id="singleStudentGroup">
+                            <label class="form-label small fw-semibold" for="student_id">Select Student *</label>
+                            {{ form.student_id(class="form-select") }}
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="fee_type">Fee Category *</label>
+                                {{ form.fee_type(class="form-select") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="billing_period">Billing Period *</label>
+                                {{ form.billing_period(class="form-control" + (" is-invalid" if form.billing_period.errors else ""), placeholder="e.g. October 2026") }}
+                                {% for error in form.billing_period.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="amount">Amount (₹) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    {{ form.amount(class="form-control" + (" is-invalid" if form.amount.errors else ""), placeholder="0.00") }}
+                                </div>
+                                {% for error in form.amount.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="due_date">Payment Due Date *</label>
+                                {{ form.due_date(class="form-control" + (" is-invalid" if form.due_date.errors else "")) }}
+                                {% for error in form.due_date.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold" for="description">Invoice Description / Remarks</label>
+                            {{ form.description(class="form-control", rows="2", placeholder="e.g. Monthly hostel room rent including utilities.") }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('admin_fees') }}" class="btn btn-outline-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-teal px-4") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const targetSelect = document.getElementById('targetSelect');
+    const studentGroup = document.getElementById('singleStudentGroup');
+    function toggleStudent() {
+        if (targetSelect.value === 'all_allocated') {
+            studentGroup.style.display = 'none';
+        } else {
+            studentGroup.style.display = 'block';
+        }
+    }
+    targetSelect.addEventListener('change', toggleStudent);
+    toggleStudent();
+});
+</script>
+{% endblock %}

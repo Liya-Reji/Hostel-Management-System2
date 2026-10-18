@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="d-flex align-items-center mb-3">
+                <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Dashboard
+                </a>
+                <h3 class="fw-bold text-navy mb-0">Manage My Profile</h3>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <!-- Non-editable academic fields -->
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="row g-2 small">
+                            <div class="col-sm-6">
+                                <span class="text-muted">Username:</span>
+                                <span class="fw-semibold ms-1">{{ profile.user.username }}</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Email:</span>
+                                <span class="fw-semibold ms-1">{{ profile.user.email }}</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Student ID / Roll:</span>
+                                <span class="fw-semibold font-monospace ms-1">{{ profile.student_id }}</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Course:</span>
+                                <span class="fw-semibold ms-1">{{ profile.course }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2">Editable Contact Details</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="full_name">Full Name *</label>
+                                {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else "")) }}
+                                {% for error in form.full_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="phone">Personal Phone Number *</label>
+                                {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else "")) }}
+                                {% for error in form.phone.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="guardian_name">Guardian / Parent Name</label>
+                                {{ form.guardian_name(class="form-control") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="guardian_phone">Guardian Phone</label>
+                                {{ form.guardian_phone(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold" for="address">Permanent Home Address</label>
+                            {{ form.address(class="form-control", rows="2") }}
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="{{ url_for('student_change_password') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-shield-lock me-1"></i> Change Password
+                            </a>
+                            {{ form.submit(class="btn btn-teal px-4") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

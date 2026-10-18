@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Request Room - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="d-flex align-items-center mb-3">
+                <a href="{{ url_for('student_rooms') }}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Rooms
+                </a>
+                <h3 class="fw-bold text-navy mb-0">Apply for Room Accommodation</h3>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-4">
+                        Submit your room application to hostel administration. Once reviewed, you will be allocated to the room upon approval.
+                    </p>
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="room_id">Preferred Room Choice</label>
+                            {{ form.room_id(class="form-select") }}
+                            <div class="form-text small">Select a specific preferred room or choose "Any Available Room".</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold" for="remarks">Special Requests / Notes (Optional)</label>
+                            {{ form.remarks(class="form-control", rows="3", placeholder="e.g. Ground floor preferred, sharing with classmate, medical requirements.") }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-teal px-4") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

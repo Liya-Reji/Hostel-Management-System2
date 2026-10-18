@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hostel-deployment
+  namespace: hostel-system
+  labels:
+    app: hostel-web
+spec:
+  # Using 1 replica for SQLite persistent volume concurrency (ReadWriteOnce)
+  # Multi-replica deployments in production would utilize a networked database (PostgreSQL/MySQL)
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hostel-web
+  template:
+    metadata:
+      labels:
+        app: hostel-web
+    spec:
+      containers:
+        - name: hostel-web-app
+          image: hostel-management-system:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: hostel-config
+            - secretRef:
+                name: hostel-secret
+          volumeMounts:
+            - name: db-storage
+              mountPath: /app/database
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+      volumes:
+        - name: db-storage
+          persistentVolumeClaim:
+            claimName: hostel-db-pvc

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Room Allocations - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-navy mb-1">Room Allocations & Tenancy</h2>
+            <p class="text-muted small mb-0">Manage student room assignments, bed capacity, transfers, and checkouts.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_new_allocation') }}" class="btn btn-teal">
+                <i class="bi bi-key-fill me-1"></i> New Room Allocation
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Room Assigned</th>
+                        <th>Monthly Rent</th>
+                        <th>Allocated On</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in allocations %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ a.student.full_name }}</div>
+                                <div class="small text-muted font-monospace">{{ a.student.student_id }}</div>
+                            </td>
+                            <td>{{ a.student.course }}</td>
+                            <td>
+                                <span class="badge bg-primary fs-6 px-2 py-1">
+                                    <i class="bi bi-door-closed me-1"></i>Room {{ a.room.room_number }}
+                                </span>
+                                <div class="small text-muted">{{ a.room.room_type }}</div>
+                            </td>
+                            <td class="fw-bold text-navy">{{ a.monthly_rent|currency }}</td>
+                            <td>
+                                <div>{{ a.allocated_date|format_date }}</div>
+                                {% if a.checkout_date %}
+                                    <div class="small text-muted">Checked out: {{ a.checkout_date|format_date }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if a.is_active %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                        <i class="bi bi-check-circle me-1"></i>Active Resident
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                        Checked Out
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if a.is_active %}
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('admin_change_room', id=a.id) }}" class="btn btn-outline-primary" title="Transfer to another room">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Transfer
+                                        </a>
+                                        <form method="POST" action="{{ url_for('admin_checkout_allocation', id=a.id) }}" class="d-inline" onsubmit="return confirm('Check out {{ a.student.full_name }} from Room {{ a.room.room_number }}?');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                            <button type="submit" class="btn btn-outline-danger" title="Check out student">
+                                                <i class="bi bi-box-arrow-right me-1"></i> Checkout
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span class="small text-muted">Archived</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-key fs-1 text-secondary d-block mb-2"></i>
+                                No room allocations recorded yet.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

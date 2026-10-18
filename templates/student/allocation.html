@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}My Room Allocation - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-navy mb-1">My Room Allocation</h2>
+            <p class="text-muted small mb-0">Details regarding your allocated hostel accommodation and roommates.</p>
+        </div>
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
+
+    {% if alloc %}
+        <div class="row g-4">
+            <!-- Room Overview -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="fw-bold mb-0 text-navy"><i class="bi bi-door-open-fill text-teal me-2"></i>Assigned Room Info</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="fw-bold text-navy mb-0">Room {{ alloc.room.room_number }}</h3>
+                            <span class="badge bg-success px-3 py-2">Active Resident</span>
+                        </div>
+
+                        <ul class="list-group list-group-flush mb-4 small">
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Room Category</span>
+                                <span class="fw-semibold">{{ alloc.room.room_type }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Bed Capacity</span>
+                                <span class="fw-semibold">{{ alloc.room.capacity }} Beds ({{ alloc.room.current_occupancy }} Occupied)</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Monthly Rent</span>
+                                <span class="fw-bold text-navy">{{ alloc.monthly_rent|currency }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Allocation Date</span>
+                                <span class="fw-semibold">{{ alloc.allocated_date|format_date }}</span>
+                            </li>
+                        </ul>
+
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="small fw-semibold text-secondary mb-1">Room Amenities & Description:</div>
+                            <p class="small text-muted mb-0">
+                                {{ alloc.room.description or 'Equipped with beds, study desks, clothes wardrobes, and standard hostel utilities.' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roommates -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="fw-bold mb-0 text-navy"><i class="bi bi-people-fill text-teal me-2"></i>My Roommates</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if roommates %}
+                            <div class="list-group list-group-flush">
+                                {% for rm in roommates %}
+                                    <div class="list-group-item px-0 py-3 d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="stat-icon teal" style="width: 40px; height: 40px; font-size: 1.1rem;">
+                                                <i class="bi bi-person"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold text-navy mb-0">{{ rm.full_name }}</h6>
+                                                <span class="small text-muted">{{ rm.course }} &bull; Roll: {{ rm.student_id }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-light text-secondary border">Roommate</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-person-check fs-1 text-secondary d-block mb-2"></i>
+                                You are currently the sole resident in this room, or this is a single room.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="card p-5 text-center shadow-sm border-0">
+            <i class="bi bi-door-closed fs-1 text-secondary d-block mb-3"></i>
+            <h4 class="fw-bold text-navy mb-2">No Room Allocation Found</h4>
+            <p class="text-muted mb-4">You have not been assigned to a hostel room yet. Please submit a room request to administration.</p>
+            <div>
+                <a href="{{ url_for('student_request_room') }}" class="btn btn-teal">
+                    <i class="bi bi-send me-1"></i> Submit Room Application
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

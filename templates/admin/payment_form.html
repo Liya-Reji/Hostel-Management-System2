@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment - Invoice #{{ bill.bill_number }} - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="d-flex align-items-center mb-3">
+                <a href="{{ url_for('admin_view_bill', id=bill.id) }}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Invoice
+                </a>
+                <h3 class="fw-bold text-navy mb-0">Record Offline Payment</h3>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">Student:</span>
+                            <span class="fw-bold">{{ bill.student.full_name }} ({{ bill.student.student_id }})</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">Fee Category:</span>
+                            <span class="fw-semibold">{{ bill.fee_type }} ({{ bill.billing_period }})</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">Total Billed:</span>
+                            <span class="fw-semibold">{{ bill.amount|currency }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">Already Paid:</span>
+                            <span class="fw-semibold text-success">{{ bill.total_paid|currency }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold text-navy">Outstanding Balance:</span>
+                            <span class="fw-bold text-danger fs-5">{{ bill.balance|currency }}</span>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="amount">Payment Amount (₹) *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                {{ form.amount(class="form-control" + (" is-invalid" if form.amount.errors else ""), max=bill.balance, step="0.01") }}
+                            </div>
+                            <div class="form-text small">Enter amount received (supports partial payments up to outstanding balance).</div>
+                            {% for error in form.amount.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="payment_date">Receipt Date *</label>
+                                {{ form.payment_date(class="form-control" + (" is-invalid" if form.payment_date.errors else "")) }}
+                                {% for error in form.payment_date.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold" for="payment_mode">Payment Mode *</label>
+                                {{ form.payment_mode(class="form-select") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold" for="reference_note">Reference / Transaction / Slip Number</label>
+                            {{ form.reference_note(class="form-control", placeholder="e.g. Bank Ref #99214, Cheque #0012, or Cash Receipt") }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('admin_view_bill', id=bill.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-teal px-4") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

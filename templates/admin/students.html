@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Students - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-navy mb-1">Registered Students</h2>
+            <p class="text-muted small mb-0">View, search, and manage student residents and their account statuses.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_add_student') }}" class="btn btn-teal">
+                <i class="bi bi-person-plus-fill me-1"></i> Add New Student
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card p-3 mb-4 shadow-sm border-0">
+        <form method="GET" action="{{ url_for('admin_students') }}" class="row g-2 align-items-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name, roll no, or username..." value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Account Statuses</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Deactivated Only</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary-custom">Filter</button>
+                {% if search or status_filter != 'all' %}
+                    <a href="{{ url_for('admin_students') }}" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Students Table -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Student ID / Roll</th>
+                        <th>Student Name</th>
+                        <th>Course</th>
+                        <th>Contact</th>
+                        <th>Current Room</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                        <tr>
+                            <td>
+                                <span class="fw-bold text-navy font-monospace">{{ s.student_id }}</span>
+                                <div class="small text-muted">User: {{ s.user.username }}</div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">{{ s.full_name }}</div>
+                                <div class="small text-muted">{{ s.user.email }}</div>
+                            </td>
+                            <td>{{ s.course }}</td>
+                            <td>
+                                <div><i class="bi bi-telephone text-muted me-1"></i>{{ s.phone }}</div>
+                            </td>
+                            <td>
+                                {% if s.active_allocation %}
+                                    <span class="badge bg-primary text-white">
+                                        <i class="bi bi-door-closed me-1"></i>Room {{ s.active_allocation.room.room_number }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-light text-secondary border">Unallocated</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if s.is_active %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Deactivated</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('admin_view_student', id=s.id) }}" class="btn btn-outline-primary" title="View Details & Fees">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('admin_edit_student', id=s.id) }}" class="btn btn-outline-secondary" title="Edit Profile">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin_toggle_student_status', id=s.id) }}" class="d-inline" onsubmit="return confirm('Change active status for this student?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-outline-warning" title="{{ 'Deactivate' if s.is_active else 'Activate' }}">
+                                            <i class="bi {{ 'bi-person-slash' if s.is_active else 'bi-person-check' }}"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin_delete_student', id=s.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this student account? Notice: If billing/payment history exists, deletion is prevented to preserve financial audit trail.');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-outline-danger" title="Delete Student">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-people fs-1 text-secondary d-block mb-2"></i>
+                                No student records found matching the criteria.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

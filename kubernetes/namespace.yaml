@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hostel-system
+  labels:
+    app.kubernetes.io/name: hostel-management
+    app.kubernetes.io/part-of: bca-micro-project

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Bill #{{ bill.bill_number }} - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="d-flex align-items-center mb-3">
+                <a href="{{ url_for('admin_view_bill', id=bill.id) }}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Invoice
+                </a>
+                <h3 class="fw-bold text-navy mb-0">Edit Invoice #{{ bill.bill_number }}</h3>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="p-3 bg-light rounded-3 mb-3">
+                        <div class="fw-semibold">{{ bill.student.full_name }} ({{ bill.student.student_id }})</div>
+                        <div class="small text-muted">{{ bill.fee_type }} &bull; Period: {{ bill.billing_period }}</div>
+                    </div>
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="amount">Invoice Amount (₹) *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input type="number" step="0.01" min="1" name="amount" id="amount" class="form-control" value="{{ bill.amount }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="due_date">Due Date *</label>
+                            <input type="date" name="due_date" id="due_date" class="form-control" value="{{ bill.due_date.strftime('%Y-%m-%d') }}" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold" for="description">Description / Notes</label>
+                            <textarea name="description" id="description" class="form-control" rows="2">{{ bill.description or '' }}</textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('admin_view_bill', id=bill.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-teal px-4">Update Invoice</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

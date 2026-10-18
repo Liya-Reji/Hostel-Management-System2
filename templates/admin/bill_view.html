@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice #{{ bill.bill_number }} - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ url_for('admin_fees') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="fw-bold text-navy mb-0">Invoice #{{ bill.bill_number }}</h2>
+                <div class="text-muted small">Generated on {{ bill.created_at|format_date }}</div>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            {% if bill.balance > 0 %}
+                <a href="{{ url_for('admin_record_payment', id=bill.id) }}" class="btn btn-teal">
+                    <i class="bi bi-credit-card me-1"></i> Record Payment
+                </a>
+            {% endif %}
+            {% if not bill.payments %}
+                <a href="{{ url_for('admin_edit_bill', id=bill.id) }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-pencil me-1"></i> Edit
+                </a>
+                <form method="POST" action="{{ url_for('admin_cancel_bill', id=bill.id) }}" class="d-inline" onsubmit="return confirm('Cancel and remove this bill?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-trash me-1"></i> Cancel Bill
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Bill Overview -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-navy"><i class="bi bi-info-circle text-teal me-2"></i>Invoice Details</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Student Name</span>
+                            <span class="fw-semibold">
+                                <a href="{{ url_for('admin_view_student', id=bill.student.id) }}" class="text-decoration-none">
+                                    {{ bill.student.full_name }}
+                                </a>
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Student ID / Roll</span>
+                            <span class="fw-semibold font-monospace">{{ bill.student.student_id }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Fee Category</span>
+                            <span class="badge bg-light text-dark border">{{ bill.fee_type }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Billing Period</span>
+                            <span class="fw-semibold">{{ bill.billing_period }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Due Date</span>
+                            <span class="fw-semibold {{ 'text-danger' if bill.status == 'Overdue' else '' }}">{{ bill.due_date|format_date }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Payment Status</span>
+                            <span>
+                                <span class="badge-status badge-{{ bill.status|lower|replace(' ', '-') }}">{{ bill.status }}</span>
+                            </span>
+                        </li>
+                        <li class="list-group-item px-0">
+                            <div class="text-muted mb-1">Description / Notes</div>
+                            <div class="fw-semibold">{{ bill.description or 'No specific description provided.' }}</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Balance Summary -->
+            <div class="card shadow-sm border-0 p-3 bg-light">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Billed Amount:</span>
+                    <span class="fw-bold">{{ bill.amount|currency }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Amount Paid:</span>
+                    <span class="fw-bold text-success">{{ bill.total_paid|currency }}</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold text-navy fs-5">Remaining Balance:</span>
+                    <span class="fw-bold text-danger fs-5">{{ bill.balance|currency }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Receipts -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-navy"><i class="bi bi-clock-history text-teal me-2"></i>Recorded Payment Receipts</h5>
+                    {% if bill.balance > 0 %}
+                        <a href="{{ url_for('admin_record_payment', id=bill.id) }}" class="btn btn-sm btn-outline-teal">
+                            + Record Payment
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Receipt #</th>
+                                <th>Payment Date</th>
+                                <th>Mode</th>
+                                <th>Amount</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in bill.payments %}
+                                <tr>
+                                    <td class="fw-bold text-primary font-monospace">{{ p.receipt_number }}</td>
+                                    <td>{{ p.payment_date|format_date }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ p.payment_mode }}</span></td>
+                                    <td class="fw-bold text-success">{{ p.amount|currency }}</td>
+                                    <td class="small text-muted">{{ p.reference_note or '-' }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-wallet2 fs-1 text-secondary d-block mb-2"></i>
+                                        No payments recorded for this invoice yet.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

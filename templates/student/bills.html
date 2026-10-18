@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}My Bills & Dues - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-navy mb-1">My Bills & Fee Invoices</h2>
+            <p class="text-muted small mb-0">Review monthly rent, mess fees, and payments. Pay offline at the hostel office.</p>
+        </div>
+        <div class="badge bg-white text-dark border p-2 px-3 shadow-sm">
+            <span class="text-muted small">Total Outstanding: </span>
+            <span class="fw-bold {{ 'text-danger' if total_outstanding > 0 else 'text-success' }} fs-6 ms-1">
+                {{ total_outstanding|currency }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Bills Table -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Fee Category</th>
+                        <th>Billing Period</th>
+                        <th>Billed Amount</th>
+                        <th>Amount Paid</th>
+                        <th>Outstanding Balance</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bills %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('student_view_bill', id=b.id) }}" class="fw-bold text-decoration-none">
+                                    {{ b.bill_number }}
+                                </a>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">{{ b.fee_type }}</span></td>
+                            <td>{{ b.billing_period }}</td>
+                            <td class="fw-bold text-navy">{{ b.amount|currency }}</td>
+                            <td class="text-success fw-semibold">{{ b.total_paid|currency }}</td>
+                            <td class="fw-bold {{ 'text-danger' if b.balance > 0 else 'text-muted' }}">
+                                {{ b.balance|currency }}
+                            </td>
+                            <td>
+                                <span class="small {{ 'text-danger fw-bold' if b.status == 'Overdue' else 'text-muted' }}">
+                                    {{ b.due_date|format_date }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge-status badge-{{ b.status|lower|replace(' ', '-') }}">{{ b.status }}</span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('student_view_bill', id=b.id) }}" class="btn btn-sm btn-outline-primary">
+                                    View Receipt <i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="bi bi-check2-circle fs-1 text-success d-block mb-2"></i>
+                                No bills or pending fees found on your account.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

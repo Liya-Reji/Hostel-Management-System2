@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Rooms - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-navy mb-1">Hostel Room Inventory</h2>
+            <p class="text-muted small mb-0">Track room capacity, occupancy status, and monthly rental rates.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_add_room') }}" class="btn btn-teal">
+                <i class="bi bi-plus-circle me-1"></i> Add New Room
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="mb-4 d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('admin_rooms', status='all') }}" class="btn btn-sm {{ 'btn-navy btn-primary-custom' if status_filter == 'all' else 'btn-outline-secondary' }}">
+            All Rooms ({{ rooms|length }})
+        </a>
+        <a href="{{ url_for('admin_rooms', status='vacant') }}" class="btn btn-sm {{ 'btn-success' if status_filter == 'vacant' else 'btn-outline-success' }}">
+            <i class="bi bi-circle-fill me-1 small"></i> Vacant
+        </a>
+        <a href="{{ url_for('admin_rooms', status='partially_occupied') }}" class="btn btn-sm {{ 'btn-warning text-dark' if status_filter == 'partially_occupied' else 'btn-outline-warning' }}">
+            <i class="bi bi-pie-chart-fill me-1 small"></i> Partially Occupied
+        </a>
+        <a href="{{ url_for('admin_rooms', status='full') }}" class="btn btn-sm {{ 'btn-danger' if status_filter == 'full' else 'btn-outline-danger' }}">
+            <i class="bi bi-check2-all me-1 small"></i> Fully Occupied
+        </a>
+    </div>
+
+    <!-- Rooms Grid -->
+    <div class="row g-3">
+        {% for r in rooms %}
+            <div class="col-xl-4 col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h4 class="fw-bold text-navy mb-0">Room {{ r.room_number }}</h4>
+                                <span class="badge bg-light text-dark border">{{ r.room_type }}</span>
+                            </div>
+                            <span class="badge-status badge-{{ 'vacant' if r.status == 'Vacant' else ('partial' if r.status == 'Partially Occupied' else 'full') }}">
+                                {{ r.status }}
+                            </span>
+                        </div>
+
+                        <p class="text-muted small mb-3">
+                            {{ r.description or 'Standard room equipped with individual desks and study lamps.' }}
+                        </p>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>Occupancy: <strong>{{ r.current_occupancy }} / {{ r.capacity }}</strong> beds</span>
+                                <span>{{ r.available_beds }} bed(s) available</span>
+                            </div>
+                            {% set pct = (r.current_occupancy / r.capacity * 100)|round %}
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar {{ 'bg-success' if pct == 0 else ('bg-warning' if pct < 100 else 'bg-danger') }}" 
+                                     role="progressbar" style="width: {{ pct }}%;" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Residents -->
+                        <div class="mb-3">
+                            <div class="small fw-semibold text-secondary mb-1">Current Occupants:</div>
+                            {% set active_allocs = r.allocations|selectattr('is_active')|list %}
+                            {% if active_allocs %}
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for alloc in active_allocs %}
+                                        <span class="badge bg-light text-primary border" title="ID: {{ alloc.student.student_id }}">
+                                            <i class="bi bi-person me-1"></i>{{ alloc.student.full_name }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="small text-muted fst-italic">No active occupants</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <div>
+                                <div class="small text-muted">Monthly Rent</div>
+                                <div class="fw-bold text-navy fs-5">{{ r.monthly_rent|currency }}</div>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin_edit_room', id=r.id) }}" class="btn btn-outline-secondary" title="Edit Room">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if not r.is_full %}
+                                    <a href="{{ url_for('admin_new_allocation') }}?room_id={{ r.id }}" class="btn btn-teal" title="Allocate Student">
+                                        <i class="bi bi-person-plus"></i>
+                                    </a>
+                                {% endif %}
+                                <form method="POST" action="{{ url_for('admin_delete_room', id=r.id) }}" class="d-inline" onsubmit="return confirm('Delete Room {{ r.room_number }}?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn btn-outline-danger" title="Delete Room" {{ 'disabled' if r.current_occupancy > 0 }}>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-door-closed fs-1 text-secondary d-block mb-2"></i>
+                <h5 class="text-muted">No rooms configured or matching filter.</h5>
+                <a href="{{ url_for('admin_add_room') }}" class="btn btn-teal btn-sm mt-2">Add Your First Room</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
