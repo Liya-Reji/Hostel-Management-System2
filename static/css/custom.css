@@ -163,11 +163,3 @@ body {
   color: #ffffff;
   padding: 4.5rem 0;
 }
-
-/* Footer */
-footer {
-  background-color: var(--navy-dark);
-  color: #94a3b8;
-  padding: 1.5rem 0;
-  font-size: 0.9rem;
-}
