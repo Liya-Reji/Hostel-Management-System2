@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - HostelHub Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <span class="badge bg-info text-dark px-3 py-2 rounded-pill mb-3 fw-semibold shadow-sm">
+                    <i class="bi bi-mortarboard-fill me-1"></i> BCA Micro-Project Demonstration
+                </span>
+                <h1 class="display-4 fw-bold mb-3 text-white">Modern Hostel Management & Billing System</h1>
+                <p class="lead mb-4 text-light opacity-90">
+                    A streamlined, secure platform designed for college hostel administration, real-time room allocations, automated billing, offline payment tracking, and student self-service.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    {% if current_user %}
+                        {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-teal btn-lg px-4 shadow">
+                                <i class="bi bi-speedometer2 me-2"></i> Open Admin Dashboard
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('student_dashboard') }}" class="btn btn-teal btn-lg px-4 shadow">
+                                <i class="bi bi-speedometer2 me-2"></i> Open Student Dashboard
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-light btn-lg px-4 fw-semibold text-primary shadow">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Portal Login
+                        </a>
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg px-4 shadow">
+                            <i class="bi bi-person-plus me-2"></i> Student Registration
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats and Features -->
+<section class="py-5">
+    <div class="container">
+        <!-- Live Quick Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card stat-card h-100 p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon teal me-3">
+                            <i class="bi bi-door-closed"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold">Configured Rooms</span>
+                            <h3 class="fw-bold mb-0 text-navy">{{ total_rooms }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card h-100 p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon success me-3">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold">Vacant Rooms Available</span>
+                            <h3 class="fw-bold mb-0 text-success">{{ vacant_rooms }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card h-100 p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon primary me-3">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold">Role-Based Access</span>
+                            <h3 class="fw-bold mb-0 text-primary">Admin & Student</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Architecture Features -->
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-navy">Key System Features</h2>
+            <p class="text-muted">Designed for simplicity, data consistency, and reliable deployment.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0 shadow-sm">
+                    <div class="text-teal fs-1 mb-3">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h5 class="fw-bold">Student Management</h5>
+                    <p class="text-muted">
+                        Register, search, view, edit, and deactivate student profiles with complete records of allocations and billing history.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0 shadow-sm">
+                    <div class="text-teal fs-1 mb-3">
+                        <i class="bi bi-diagram-3-fill"></i>
+                    </div>
+                    <h5 class="fw-bold">Room Allocations</h5>
+                    <p class="text-muted">
+                        Track vacancies in real-time, approve or reject student room requests, and prevent over-allocation beyond bed capacities.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0 shadow-sm">
+                    <div class="text-teal fs-1 mb-3">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                    <h5 class="fw-bold">Fee & Mess Billing</h5>
+                    <p class="text-muted">
+                        Generate monthly rent and mess fee bills, record offline cash/bank/UPI payments, track partial dues, and flag overdue balances.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
