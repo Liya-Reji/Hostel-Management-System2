@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration - HostelHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="stat-icon teal mx-auto mb-2">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">Student Registration</h3>
+                        <p class="text-muted small">Create your student hostel portal profile</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('register') }}">
+                        {{ form.hidden_tag() }}
+
+                        <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2">Account Details</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="username">Username *</label>
+                                {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="e.g. rahul_sharma") }}
+                                {% for error in form.username.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="email">Email Address *</label>
+                                {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu") }}
+                                {% for error in form.email.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="password">Password *</label>
+                                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="Minimum 6 characters") }}
+                                {% for error in form.password.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="confirm_password">Confirm Password *</label>
+                                {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Re-enter password") }}
+                                {% for error in form.confirm_password.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2 pt-2">Student & Academic Profile</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="student_id">Roll No / Student ID *</label>
+                                {{ form.student_id(class="form-control" + (" is-invalid" if form.student_id.errors else ""), placeholder="e.g. BCA-2024-042") }}
+                                {% for error in form.student_id.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="full_name">Full Name *</label>
+                                {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else ""), placeholder="Enter full name") }}
+                                {% for error in form.full_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="course">Course / Department *</label>
+                                {{ form.course(class="form-control" + (" is-invalid" if form.course.errors else ""), placeholder="e.g. BCA 3rd Year") }}
+                                {% for error in form.course.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-secondary" for="phone">Phone *</label>
+                                {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="10-digit number") }}
+                                {% for error in form.phone.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-secondary" for="gender">Gender *</label>
+                                {{ form.gender(class="form-select" + (" is-invalid" if form.gender.errors else "")) }}
+                                {% for error in form.gender.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2 pt-2">Emergency / Guardian Information</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="guardian_name">Guardian / Parent Name</label>
+                                {{ form.guardian_name(class="form-control", placeholder="Guardian name") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary" for="guardian_phone">Guardian Phone</label>
+                                {{ form.guardian_phone(class="form-control", placeholder="Emergency contact number") }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary" for="address">Permanent Address</label>
+                                {{ form.address(class="form-control", rows="2", placeholder="City, State, PIN") }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-teal py-2 fw-semibold") }}
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <span class="text-muted small">Already have an account? </span>
+                        <a href="{{ url_for('login') }}" class="small fw-semibold text-decoration-none text-teal">Sign In here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
