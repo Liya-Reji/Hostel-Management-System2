@@ -1,0 +1,28 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hostel-management-system:latest
+    container_name: hostel_app_container
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-hostel-production-secret-change-me}
+      - DATABASE_DIR=/app/database
+      - SESSION_COOKIE_SECURE=False
+    volumes:
+      # Persistent named volume mounted to /app/database ensures SQLite data survives restarts and rebuilds
+      - hostel_db_volume:/app/database
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  hostel_db_volume:
+    name: hostel_management_db_data
